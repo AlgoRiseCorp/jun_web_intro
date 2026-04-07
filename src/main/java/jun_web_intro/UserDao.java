@@ -1,7 +1,9 @@
 package jun_web_intro;
 
+import java.util.List;
+
 import org.springframework.jdbc.core.JdbcTemplate; //DB操作を省略できる
-import org.springframework.stereotype.Repository; 
+import org.springframework.stereotype.Repository; //SpringがこのクラスをDIと認識してくれる
 
 @Repository
 public class UserDao {
@@ -26,12 +28,26 @@ public class UserDao {
         );
     }
 
-    public void insert(UserCreateRequest request) { //nameとe-mailを受け取ってテーブルに入れる
+    public void insert(UserCreateRequest request) { //nameとe-mailとageとjobを受け取ってテーブルに入れる
         String sql = "INSERT INTO users (name, email) VALUES (?, ?)";
 
         jdbcTemplate.update(sql,
                 request.getName(),
                 request.getEmail()
         );
+    }
+
+    public List<User> findAll(){
+        String spl = "SELECT id, name, email FROM users";
+
+        return jdbcTemplate.query(
+            spl,
+            (rs, rowNum) -> new User(
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("email")
+            )
+        );
+
     }
 }
