@@ -1,18 +1,23 @@
 package jun_web_intro;
 
+import java.util.List;
 import java.util.Map;
 
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.beans.factory.annotation.Autowired; //Springが自動でUserDaoを注入してくれる
+import org.springframework.web.bind.annotation.GetMapping; //GETリクエストをメソッドに対応させるためのもの
 import org.springframework.web.bind.annotation.PathVariable;  //URLの一部に含まれる値を取り出す
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController; //文字列とJSONをそのまま返す
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody; //リクエストボディのJSONをJavaオブジェクトや引数に変換して受け取る
+import org.springframework.web.bind.annotation.RequestParam; //クエリパラメータを受け取るもの
+import org.springframework.web.bind.annotation.RestController; //@Controller と @ResponseBody をまとめた便利アノテーション
 
-@RestController
+import jakarta.validation.Valid; //オブジェクトの中に入ってる別のオブジェクトまで検査してくれる
+
+@RestController //クラス内のメソッドの戻り値がHTTPのレスポンスボディとして返される
 public class ApiController {
 
     private final UserDao userDao;
-
+    @Autowired
     public ApiController(UserDao userDao) {
         this.userDao = userDao;
     }
@@ -42,16 +47,21 @@ public class ApiController {
         return "API起動確認OK";
     }
 
-    @org.springframework.web.bind.annotation.PostMapping("/body")
+    @PostMapping("/body")
     public String body(@RequestBody SampleRequest request) {
         return "name=" + request.getName()
                 + ", age=" + request.getAge()
                 + ", job=" + request.getJob();
     }
 
-    @org.springframework.web.bind.annotation.PostMapping("/users") //リクエストボディで受け取ったUser情報を登録
-    public String createUser(@RequestBody UserCreateRequest request) {
+    @PostMapping("/users") //リクエストボディで受け取ったUser情報を登録
+    public String createUser(@Valid @RequestBody UserCreateRequest request) {
         userDao.insert(request);
         return "登録しました";
+    }
+
+    @GetMapping("/users")
+    public List<User> getUsers(){
+        return userDao.findAll();
     }
 }
